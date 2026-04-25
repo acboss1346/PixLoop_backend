@@ -108,3 +108,59 @@ export const getComments = async (req, res) => {
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };
+
+// @desc    Save a post
+// @route   POST /api/posts/:id/save
+// @access  Private
+export const savePost = async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const userId = req.user.id;
+
+    const [existingSave] = await pool.query(
+      'SELECT * FROM saves WHERE post_id = ? AND user_id = ?',
+      [postId, userId]
+    );
+
+    if (existingSave.length > 0) {
+      return res.status(400).json({ message: 'Post already saved' });
+    }
+
+    await pool.query(
+      'INSERT INTO saves (post_id, user_id) VALUES (?, ?)',
+      [postId, userId]
+    );
+
+    res.json({ message: 'Post saved' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+};
+
+// @desc    Unsave a post
+// @route   DELETE /api/posts/:id/save
+// @access  Private
+export const unsavePost = async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const userId = req.user.id;
+
+    const [existingSave] = await pool.query(
+      'SELECT * FROM saves WHERE post_id = ? AND user_id = ?',
+      [postId, userId]
+    );
+
+    if (existingSave.length === 0) {
+      return res.status(400).json({ message: 'Post has not yet been saved' });
+    }
+
+    await pool.query(
+      'DELETE FROM saves WHERE post_id = ? AND user_id = ?',
+      [postId, userId]
+    );
+
+    res.json({ message: 'Post unsaved' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+};
