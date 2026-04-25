@@ -56,7 +56,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Something went wrong!', error: err.message, stack: process.env.NODE_ENV === 'development' ? err.stack : undefined });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = 5001;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
