@@ -17,6 +17,10 @@ async function initDB() {
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
+      port: process.env.DB_PORT || 4000,
+      ssl: {
+        rejectUnauthorized: false
+      }
     });
 
     console.log(`Connected to MySQL server as id ${connection.threadId}`);

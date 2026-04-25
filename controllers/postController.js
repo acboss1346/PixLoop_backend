@@ -25,6 +25,18 @@ export const createPost = async (req, res) => {
       [req.user.id, imageUrl, caption || '']
     );
 
+    if (caption) {
+      const hashtags = caption.match(/#[\\w]+/g);
+      if (hashtags) {
+        for (const tag of hashtags) {
+          await pool.query(
+            'INSERT INTO post_hashtags (post_id, hashtag) VALUES (?, ?)',
+            [result.insertId, tag.toLowerCase()]
+          );
+        }
+      }
+    }
+
     const [newPost] = await pool.query(
       `SELECT p.*, u.username, u.profile_pic 
        FROM posts p 
@@ -48,16 +60,19 @@ export const getPosts = async (req, res) => {
       `SELECT p.*, u.username, u.profile_pic,
        (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as like_count,
        (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as comment_count,
-       (SELECT COUNT(*) > 0 FROM likes WHERE post_id = p.id AND user_id = ?) as is_liked
+       (SELECT COUNT(*) > 0 FROM likes WHERE post_id = p.id AND user_id = ?) as is_liked,
+       (SELECT COUNT(*) FROM saves WHERE post_id = p.id) as save_count,
+       (SELECT COUNT(*) > 0 FROM saves WHERE post_id = p.id AND user_id = ?) as is_saved
        FROM posts p 
        JOIN users u ON p.user_id = u.id 
        ORDER BY p.created_at DESC`,
-      [req.user.id]
+      [req.user.id, req.user.id]
     );
-    // Convert is_liked from 0/1 to boolean
+    // Convert is_liked and is_saved from 0/1 to boolean
     const formattedPosts = posts.map(post => ({
       ...post,
-      is_liked: !!post.is_liked
+      is_liked: !!post.is_liked,
+      is_saved: !!post.is_saved
     }));
 
     res.json(formattedPosts);
@@ -76,11 +91,13 @@ export const getPost = async (req, res) => {
       `SELECT p.*, u.username, u.profile_pic,
        (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as like_count,
        (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as comment_count,
-       (SELECT COUNT(*) > 0 FROM likes WHERE post_id = p.id AND user_id = ?) as is_liked
+       (SELECT COUNT(*) > 0 FROM likes WHERE post_id = p.id AND user_id = ?) as is_liked,
+       (SELECT COUNT(*) FROM saves WHERE post_id = p.id) as save_count,
+       (SELECT COUNT(*) > 0 FROM saves WHERE post_id = p.id AND user_id = ?) as is_saved
        FROM posts p 
        JOIN users u ON p.user_id = u.id 
        WHERE p.id = ?`,
-      [req.user.id, req.params.id]
+      [req.user.id, req.user.id, req.params.id]
     );
 
     if (posts.length === 0) {
@@ -89,7 +106,8 @@ export const getPost = async (req, res) => {
 
     const post = {
       ...posts[0],
-      is_liked: !!posts[0].is_liked
+      is_liked: !!posts[0].is_liked,
+      is_saved: !!posts[0].is_saved
     };
 
     res.json(post);
