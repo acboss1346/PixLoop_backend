@@ -25,18 +25,6 @@ export const createPost = async (req, res) => {
       [req.user.id, imageUrl, caption || '']
     );
 
-    if (caption) {
-      const hashtags = caption.match(/#[\\w]+/g);
-      if (hashtags) {
-        for (const tag of hashtags) {
-          await pool.query(
-            'INSERT INTO post_hashtags (post_id, hashtag) VALUES (?, ?)',
-            [result.insertId, tag.toLowerCase()]
-          );
-        }
-      }
-    }
-
     const [newPost] = await pool.query(
       `SELECT p.*, u.username, u.profile_pic 
        FROM posts p 
