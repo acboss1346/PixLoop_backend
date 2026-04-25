@@ -1,6 +1,6 @@
 import express from 'express';
 import { createPost, getPosts, getPost, deletePost } from '../controllers/postController.js';
-import { likePost, unlikePost, addComment, getComments, savePost, unsavePost } from '../controllers/interactionController.js';
+import { likePost, unlikePost, addComment, getComments } from '../controllers/interactionController.js';
 import { protect } from '../middleware/auth.js';
 import { upload } from '../middleware/upload.js';
 
@@ -17,10 +17,6 @@ router.route('/:id')
 router.route('/:id/like')
   .post(protect, likePost)
   .delete(protect, unlikePost);
-
-router.route('/:id/save')
-  .post(protect, savePost)
-  .delete(protect, unsavePost);
 
 router.route('/:id/comments')
   .get(protect, getComments)

@@ -13,7 +13,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: ['https://pixloop-nu.vercel.app', 'http://localhost:5173', 'http://localhost:5174'],
+  origin: ['https://pixloop-nu.vercel.app', 'http://localhost:5173'],
   credentials: true,
 }));
 app.use(express.json());
@@ -24,16 +24,14 @@ app.use(express.urlencoded({ extended: true }));
 
 import authRoutes from './routes/authRoutes.js';
 import postRoutes from './routes/postRoutes.js';
-import communityRoutes from './routes/communityRoutes.js';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
-app.use('/api/communities', communityRoutes);
 
 import pool from './config/db.js';
 
 app.get('/', (req, res) => {
-  res.json({ message: 'PixLoop Backend API', status: 'running', endpoints: { health: '/api/health', auth: '/api/auth', posts: '/api/posts', communities: '/api/communities' } });
+  res.json({ message: 'PixLoop Backend API', status: 'running', endpoints: { health: '/api/health', auth: '/api/auth', posts: '/api/posts' } });
 });
 
 app.get('/api/health', async (req, res) => {
@@ -56,7 +54,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Something went wrong!', error: err.message, stack: process.env.NODE_ENV === 'development' ? err.stack : undefined });
 });
 
-const PORT = 5001;
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
