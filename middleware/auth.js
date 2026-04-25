@@ -25,12 +25,12 @@ export const protect = async (req, res, next) => {
       req.user = rows[0];
       next();
     } catch (error) {
-      console.error(error);
-      res.status(401).json({ message: 'Not authorized, token failed' });
+      console.error('AUTH MIDDLEWARE ERROR:', error.message);
+      return res.status(401).json({ message: 'Not authorized, token failed', error: error.message });
     }
   }
 
   if (!token) {
-    res.status(401).json({ message: 'Not authorized, no token' });
+    return res.status(401).json({ message: 'Not authorized, no token' });
   }
 };

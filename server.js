@@ -30,6 +30,10 @@ app.use('/api/posts', postRoutes);
 
 import pool from './config/db.js';
 
+app.get('/', (req, res) => {
+  res.json({ message: 'PixLoop Backend API', status: 'running', endpoints: { health: '/api/health', auth: '/api/auth', posts: '/api/posts' } });
+});
+
 app.get('/api/health', async (req, res) => {
   try {
     await pool.query('SELECT 1');
@@ -39,10 +43,15 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ message: 'Route not found', path: req.path });
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Something went wrong!', error: err.message });
+  console.error('ERROR:', err);
+  res.status(500).json({ message: 'Something went wrong!', error: err.message, stack: process.env.NODE_ENV === 'development' ? err.stack : undefined });
 });
 
 const PORT = process.env.PORT || 5000;
