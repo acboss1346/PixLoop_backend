@@ -87,7 +87,21 @@ export const loginUser = async (req, res) => {
 // @access  Private
 export const getMe = async (req, res) => {
   try {
-    res.status(200).json(req.user);
+    const [users] = await pool.query('SELECT id, username, email, profile_pic, notifications_enabled FROM users WHERE id = ?', [req.user.id]);
+    res.status(200).json(users[0]);
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+};
+
+// @desc    Toggle notifications setting
+// @route   PUT /api/auth/notifications-settings
+// @access  Private
+export const toggleNotifications = async (req, res) => {
+  try {
+    const { enabled } = req.body;
+    await pool.query('UPDATE users SET notifications_enabled = ? WHERE id = ?', [enabled, req.user.id]);
+    res.json({ message: 'Notification settings updated', enabled });
   } catch (error) {
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
