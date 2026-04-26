@@ -22,6 +22,14 @@ export const likePost = async (req, res) => {
       [postId, userId]
     );
 
+    const [post] = await pool.query('SELECT p.user_id, u.notifications_enabled FROM posts p JOIN users u ON p.user_id = u.id WHERE p.id = ?', [postId]);
+    if (post.length > 0 && post[0].user_id !== userId && post[0].notifications_enabled) {
+      await pool.query(
+        'INSERT INTO notifications (user_id, sender_id, post_id, type) VALUES (?, ?, ?, ?)',
+        [post[0].user_id, userId, postId, 'like']
+      );
+    }
+
     res.json({ message: 'Post liked' });
   } catch (error) {
     res.status(500).json({ message: 'Server Error', error: error.message });
@@ -73,6 +81,14 @@ export const addComment = async (req, res) => {
       'INSERT INTO comments (post_id, user_id, comment) VALUES (?, ?, ?)',
       [postId, userId, comment]
     );
+
+    const [post] = await pool.query('SELECT p.user_id, u.notifications_enabled FROM posts p JOIN users u ON p.user_id = u.id WHERE p.id = ?', [postId]);
+    if (post.length > 0 && post[0].user_id !== userId && post[0].notifications_enabled) {
+      await pool.query(
+        'INSERT INTO notifications (user_id, sender_id, post_id, type) VALUES (?, ?, ?, ?)',
+        [post[0].user_id, userId, postId, 'comment']
+      );
+    }
 
     const [newComment] = await pool.query(
       `SELECT c.*, u.username, u.profile_pic 

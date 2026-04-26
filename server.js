@@ -25,10 +25,12 @@ app.use(express.urlencoded({ extended: true }));
 import authRoutes from './routes/authRoutes.js';
 import postRoutes from './routes/postRoutes.js';
 import communityRoutes from './routes/communityRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/communities', communityRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 import pool from './config/db.js';
 
