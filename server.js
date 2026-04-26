@@ -38,6 +38,10 @@ app.get('/', (req, res) => {
   res.json({ message: 'PixLoop Backend API', status: 'running', endpoints: { health: '/api/health', auth: '/api/auth', posts: '/api/posts', communities: '/api/communities' } });
 });
 
+app.get('/api', (req, res) => {
+  res.json({ message: 'PixLoop Backend API', status: 'running', endpoints: { health: '/api/health', auth: '/api/auth', posts: '/api/posts', communities: '/api/communities', notifications: '/api/notifications' } });
+});
+
 app.get('/api/health', async (req, res) => {
   try {
     await pool.query('SELECT 1');
